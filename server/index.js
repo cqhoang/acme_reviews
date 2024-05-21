@@ -20,7 +20,13 @@ app.use(express.json());
 
 const isLoggedIn = async (req, res, next) => {
   try {
+    console.log("req.headers", req.headers.authorization);
+    req.headers.authorization = await req.headers.authorization.replace(
+      "Bearer ",
+      ""
+    );
     req.user = await findUserByToken(req.headers.authorization);
+
     next();
   } catch (ex) {
     next(ex);
@@ -54,7 +60,12 @@ app.get("/api/items/:id", async (req, res, next) => {
 // POST /api/auth/register
 app.post("/api/auth/register", async (req, res, next) => {
   try {
-    res.send(await createUserAndGenerateToken(req.body));
+    res.status(201).send(
+      await createUser({
+        username: req.body.username,
+        password: req.body.password,
+      })
+    );
   } catch (ex) {
     next(ex);
   }
